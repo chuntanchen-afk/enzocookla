@@ -1,362 +1,460 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-    <meta name="robots" content="noindex, nofollow">
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>THE GOURMET ARCHIVE</title>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Noto+Serif+TC:wght@300;500;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --bg-color: #F8F5F2; /* 頂級羊絨色 */
-            --text-main: #1A1A1A; /* 深碳黑 */
-            --accent-gold: #9D8461; /* 香檳金 */
-            --secondary-text: #666666;
-            --card-shadow: 0 10px 30px rgba(0,0,0,0.02);
-            --nav-height: 80px;
-        }
+  <meta name="robots" content="noindex, nofollow">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>THE GOURMET ARCHIVE</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Noto+Serif+TC:wght@300;500;700&display=swap" rel="stylesheet">
 
-        body {
-            font-family: 'Noto Serif TC', serif;
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            margin: 0; padding: 0;
-            display: flex; flex-direction: column; height: 100vh;
-            overflow: hidden; /* 防止翻頁時出現橫向滾動條 */
-            -webkit-font-smoothing: antialiased;
-            perspective: 1000px; /* 建立 3D 空間景深 */
-        }
+  <style>
+    :root {
+      --bg-color: #F8F5F2;
+      --text-main: #1A1A1A;
+      --accent-gold: #9D8461;
+      --secondary-text: #666666;
+      --card-shadow: 0 10px 30px rgba(0,0,0,0.02);
 
-        /* Header */
-        header {
-            padding: 30px 20px 20px;
-            text-align: center;
-            background-color: var(--bg-color);
-            border-bottom: 1px solid rgba(0,0,0,0.05);
-            z-index: 10;
-        }
+      /* ✅ 左側選單 */
+      --side-nav-width: 108px;
+      --side-nav-gap: 16px;
 
-        header h1 {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.6rem;
-            letter-spacing: 4px;
-            margin: 0;
-            font-weight: 400;
-            color: var(--accent-gold);
-        }
+      /* ✅ 手機 fallback（仍保留底部導覽高度概念） */
+      --nav-height: 80px;
+    }
 
-        /* 主內容滾動區 */
-        #main-content {
-            flex: 1;
-            overflow-y: auto;
-            overflow-x: hidden;
-            /* padding-bottom 預留給導覽列，避免內容被遮擋 */
-            padding-bottom: calc(var(--nav-height) + 20px); 
-            scroll-behavior: smooth;
-            position: relative;
-        }
+    body {
+      font-family: 'Noto Serif TC', serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      margin: 0; padding: 0;
+      display: flex; flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+      -webkit-font-smoothing: antialiased;
+      perspective: 1000px;
+    }
 
-        /* 食譜頁面容器 */
-        .recipe-page {
-            display: none;
-            padding: 0 25px 40px;
-            /* 確保翻頁時內容不會溢出容器邊界 */
-            transform-style: preserve-3d;
-            backface-visibility: hidden;
-        }
+    header {
+      padding: 30px 20px 20px;
+      text-align: center;
+      background-color: var(--bg-color);
+      border-bottom: 1px solid rgba(0,0,0,0.05);
+      z-index: 10;
+    }
 
-        /* --- 核心：3D 翻頁動效 --- */
-        .recipe-page.active {
-            display: block;
-            /* 使用更長的持續時間與貝滑曲線，營造厚重書頁的質感 */
-            animation: bookPageFlipIn 0.9s cubic-bezier(0.25, 1, 0.5, 1) forwards;
-        }
+    header h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.6rem;
+      letter-spacing: 4px;
+      margin: 0;
+      font-weight: 400;
+      color: var(--accent-gold);
+    }
 
-        @keyframes bookPageFlipIn {
-            0% {
-                opacity: 0;
-                /* 初始狀態：像書頁一樣從右側稍微翹起，帶有旋轉角度 */
-                transform: rotateY(-15deg) translateX(30px) scale(0.98);
-                filter: blur(2px);
-            }
-            100% {
-                opacity: 1;
-                /* 結束狀態：平整放置 */
-                transform: rotateY(0deg) translateX(0) scale(1);
-                filter: blur(0);
-            }
-        }
+    /* ✅ 讓內容區與左側選單並排 */
+    .app-shell{
+      flex: 1;
+      display: flex;
+      min-height: 0; /* 讓內部可滾動 */
+    }
 
-        /* --- 新增：食譜頂部插畫樣式 --- */
-        .recipe-illustration {
-            width: 100%;
-            height: 260px; /* 固定高度確保版面整齊 */
-            object-fit: cover; /* 保持圖片比例填滿 */
-            border-radius: 2px;
-            margin-bottom: 35px;
-            /* 復古濾鏡：輕微的暖色調與對比度調整，模擬舊照片質感 */
-            filter: sepia(0.15) contrast(0.95) brightness(0.95);
-            box-shadow: 0 4px 20px rgba(157, 132, 97, 0.15);
-            border-bottom: 3px solid rgba(157, 132, 97, 0.3);
-            background-color: #E0DCD8; /* 圖片載入前的佔位色 */
-        }
+    /* ✅ 左側導覽列（桌機/平板） */
+    nav.side-nav {
+      width: var(--side-nav-width);
+      position: sticky;
+      top: 0;
+      height: 100%;
+      border-right: 1px solid rgba(157, 132, 97, 0.12);
+      background: rgba(255, 255, 255, 0.55);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      padding: 18px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      z-index: 20;
+      box-shadow: 8px 0 22px rgba(0,0,0,0.02);
+    }
 
-        /* 食譜標題與標籤 */
-        .recipe-header { text-align: center; margin-bottom: 40px; }
-        .recipe-header h2 { font-size: 1.6rem; font-weight: 500; margin-bottom: 8px; }
-        .recipe-meta { font-size: 0.75rem; color: var(--accent-gold); letter-spacing: 1.5px; }
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 14px 10px;
+      border-radius: 14px;
+      cursor: pointer;
 
-        /* 章節板塊 */
-        .section { margin-bottom: 35px; }
-        .section-title {
-            font-family: 'Playfair Display', serif;
-            font-style: italic;
-            font-size: 1.1rem;
-            color: var(--accent-gold);
-            border-bottom: 1px solid rgba(157, 132, 97, 0.2);
-            padding-bottom: 8px;
-            margin-bottom: 20px;
-        }
+      color: #AAA;
+      text-decoration: none;
+      font-size: 0.66rem;
+      letter-spacing: 1px;
+      transition: all 0.35s cubic-bezier(0.25, 0.8, 0.25, 1);
 
-        /* 食材清單樣式 */
-        .ingredients-grid {
-            display: grid; grid-template-columns: 1fr; gap: 12px; padding: 0; list-style: none;
-        }
-        .ingredients-grid li {
-            font-size: 0.95rem; border-bottom: 1px solid rgba(0,0,0,0.03); padding-bottom: 8px; display: flex; justify-content: space-between;
-        }
+      border: 1px solid rgba(157, 132, 97, 0.08);
+      background: rgba(255,255,255,0.55);
+    }
 
-        /* 烹飪工藝細節 */
-        .technique-list { padding: 0; list-style: none; }
-        .technique-list li {
-            margin-bottom: 25px; position: relative; padding-left: 35px; line-height: 1.8; font-size: 0.95rem;
-        }
-        .technique-list li::before {
-            content: attr(data-step); position: absolute; left: 0; top: 0; font-family: 'Playfair Display', serif; font-size: 1.2rem; color: rgba(157, 132, 97, 0.4);
-        }
-        .technique-list strong { color: var(--accent-gold); display: block; margin-bottom: 5px; }
+    .nav-item:hover {
+      transform: translateX(2px);
+      border-color: rgba(157, 132, 97, 0.22);
+    }
 
-        /* 廚師筆記 */
-        .chef-note {
-            background-color: #FFF; padding: 20px; border: 1px solid #EEE; font-size: 0.85rem; line-height: 1.6; color: var(--secondary-text); position: relative;
-        }
-        .chef-note::before {
-            content: "Chef's Note"; display: block; font-family: 'Playfair Display', serif; font-style: italic; color: var(--accent-gold); margin-bottom: 10px;
-        }
+    .nav-item.active {
+      color: var(--accent-gold);
+      transform: translateX(3px);
+      border-color: rgba(157, 132, 97, 0.35);
+      background: rgba(157, 132, 97, 0.10);
+      box-shadow: 0 10px 25px rgba(157, 132, 97, 0.10);
+    }
 
-        /* 底部導覽 */
-        nav {
-            position: fixed; bottom: 0; left: 0; right: 0;
-            height: var(--nav-height);
-            background: rgba(255, 255, 255, 0.92);
-            backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
-            display: flex; justify-content: space-around; align-items: center;
-            border-top: 1px solid rgba(157, 132, 97, 0.1);
-            padding-bottom: env(safe-area-inset-bottom);
-            z-index: 20;
-            box-shadow: 0 -5px 20px rgba(0,0,0,0.02);
-        }
+    .nav-item-symbol { font-size: 1.4rem; line-height: 1; }
 
-        .nav-item {
-            display: flex; flex-direction: column; align-items: center;
-            color: #AAA; text-decoration: none; font-size: 0.65rem; letter-spacing: 1px; transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
-            padding: 10px;
-        }
-        .nav-item.active { color: var(--accent-gold); transform: translateY(-2px); }
-        .nav-item-symbol { font-size: 1.4rem; margin-bottom: 5px; }
+    /* ✅ 主內容滾動區（右側） */
+    #main-content {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding: 0 0 40px 0;
+      scroll-behavior: smooth;
+      position: relative;
+      min-width: 0;
+    }
 
-    </style>
+    /* 食譜頁面容器 */
+    .recipe-page {
+      display: none;
+      padding: 0 25px 40px;
+      transform-style: preserve-3d;
+      backface-visibility: hidden;
+    }
+
+    .recipe-page.active {
+      display: block;
+      animation: bookPageFlipIn 0.9s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+    }
+
+    @keyframes bookPageFlipIn {
+      0% {
+        opacity: 0;
+        transform: rotateY(-15deg) translateX(30px) scale(0.98);
+        filter: blur(2px);
+      }
+      100% {
+        opacity: 1;
+        transform: rotateY(0deg) translateX(0) scale(1);
+        filter: blur(0);
+      }
+    }
+
+    .recipe-illustration {
+      width: 100%;
+      height: 260px;
+      object-fit: cover;
+      border-radius: 2px;
+      margin-bottom: 35px;
+      filter: sepia(0.15) contrast(0.95) brightness(0.95);
+      box-shadow: 0 4px 20px rgba(157, 132, 97, 0.15);
+      border-bottom: 3px solid rgba(157, 132, 97, 0.3);
+      background-color: #E0DCD8;
+    }
+
+    .recipe-header { text-align: center; margin-bottom: 40px; }
+    .recipe-header h2 { font-size: 1.6rem; font-weight: 500; margin-bottom: 8px; }
+    .recipe-meta { font-size: 0.75rem; color: var(--accent-gold); letter-spacing: 1.5px; }
+
+    .section { margin-bottom: 35px; }
+    .section-title {
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      font-size: 1.1rem;
+      color: var(--accent-gold);
+      border-bottom: 1px solid rgba(157, 132, 97, 0.2);
+      padding-bottom: 8px;
+      margin-bottom: 20px;
+    }
+
+    .ingredients-grid { display: grid; grid-template-columns: 1fr; gap: 12px; padding: 0; list-style: none; }
+    .ingredients-grid li {
+      font-size: 0.95rem;
+      border-bottom: 1px solid rgba(0,0,0,0.03);
+      padding-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+    }
+    .ingredients-grid li span:last-child { white-space: nowrap; }
+
+    .technique-list { padding: 0; list-style: none; }
+    .technique-list li {
+      margin-bottom: 25px;
+      position: relative;
+      padding-left: 35px;
+      line-height: 1.8;
+      font-size: 0.95rem;
+    }
+    .technique-list li::before {
+      content: attr(data-step);
+      position: absolute;
+      left: 0; top: 0;
+      font-family: 'Playfair Display', serif;
+      font-size: 1.2rem;
+      color: rgba(157, 132, 97, 0.4);
+    }
+    .technique-list strong { color: var(--accent-gold); display: block; margin-bottom: 5px; }
+
+    .chef-note {
+      background-color: #FFF;
+      padding: 20px;
+      border: 1px solid #EEE;
+      font-size: 0.85rem;
+      line-height: 1.6;
+      color: var(--secondary-text);
+      position: relative;
+    }
+    .chef-note::before {
+      content: "Chef's Note";
+      display: block;
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      color: var(--accent-gold);
+      margin-bottom: 10px;
+    }
+
+    /* ✅ 手機：改回底部導覽（避免左側太擠） */
+    @media (max-width: 720px) {
+      .app-shell{ flex-direction: column; }
+      nav.side-nav{
+        position: fixed;
+        bottom: 0; left: 0; right: 0;
+        top: auto;
+        width: auto;
+        height: var(--nav-height);
+        flex-direction: row;
+        justify-content: space-around;
+        align-items: center;
+        border-right: none;
+        border-top: 1px solid rgba(157, 132, 97, 0.1);
+        padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
+        box-shadow: 0 -5px 20px rgba(0,0,0,0.02);
+      }
+      .nav-item{
+        flex: 1;
+        border-radius: 14px;
+        background: transparent;
+        border: 1px solid transparent;
+        padding: 10px 6px;
+      }
+      .nav-item.active{
+        background: rgba(157, 132, 97, 0.10);
+        border-color: rgba(157, 132, 97, 0.25);
+        transform: translateY(-2px);
+      }
+      #main-content{
+        padding-bottom: calc(var(--nav-height) + 20px);
+      }
+    }
+  </style>
 </head>
+
 <body>
-
-<header>
+  <header>
     <h1>Enzo Cook~</h1>
-</header>
+  </header>
 
-<div id="main-content">
-    
-    <div id="beef-curry" class="recipe-page active">
+  <div class="app-shell">
+    <!-- ✅ 左側選單 -->
+    <nav class="side-nav" aria-label="Recipe navigation">
+      <div class="nav-item active" onclick="switchRecipe('beef-curry', this)">
+        <span class="nav-item-symbol">✦</span>
+        <span>歐風咖哩</span>
+      </div>
+      <div class="nav-item" onclick="switchRecipe('tofu-pasta', this)">
+        <span class="nav-item-symbol">◈</span>
+        <span>豆腐義大利麵</span>
+      </div>
+      <div class="nav-item" onclick="switchRecipe('nikujaga', this)">
+        <span class="nav-item-symbol">◇</span>
+        <span>日式燉肉</span>
+      </div>
+    </nav>
+
+    <!-- ✅ 右側內容 -->
+    <div id="main-content">
+      <div id="beef-curry" class="recipe-page active">
         <img src="https://source.unsplash.com/800x600/?gourmet,beef,curry,dark" alt="Smoked Beef Curry" class="recipe-illustration">
-
         <div class="recipe-header">
-            <h2>煙燻巴沙米克牛肋咖哩</h2>
-            <div class="recipe-meta">RICH • SMOKY • SLOW BRAISED</div>
+          <h2>煙燻巴沙米克牛肋咖哩</h2>
         </div>
 
         <div class="section">
-            <div class="section-title">食 材</div>
-            <ul class="ingredients-grid">
-                <li><span>優選牛肋條 (修筋剪小塊)</span> <span>450g-600g</span></li>
-                <li><span>焦糖洋蔥 (0.3cm 極細丁)</span> <span>1 顆</span></li>
-                <li><span>原野蘑菇 (厚切片)</span> <span>8 朵</span></li>
-                <li><span>手磨蒜泥 / 生薑泥</span> <span>1 大匙 / 1 小匙</span></li>
-                <li><span>煙燻紅椒粉 / 秘製咖哩粉</span> <span>各 1 大匙</span></li>
-                <li><span>熟成巴沙米克醋 (Balsamic)</span> <span>1.5 大匙</span></li>
-                <li><span>澄清雞高湯</span> <span>適量 (蓋過食材)</span></li>
-                <li><span>70% 黑巧克力 / 爪哇咖哩塊</span> <span>2 片 / 1/4 塊</span></li>
-            </ul>
+          <div class="section-title">食 材</div>
+          <ul class="ingredients-grid">
+            <li><span>優選牛肋條 (修筋剪小塊)</span> <span>450g-600g</span></li>
+            <li><span>洋蔥 (0.3cm 極細丁)</span> <span>1 顆</span></li>
+            <li><span>蘑菇 (厚切片)</span> <span>8 朵</span></li>
+            <li><span>蒜泥 / 生薑泥</span> <span>1 大匙 / 1 小匙</span></li>
+            <li><span>煙燻紅椒粉 / 咖哩粉</span> <span>各 1 大匙</span></li>
+            <li><span>巴沙米克醋 (Balsamic)</span> <span>1.5 大匙</span></li>
+            <li><span>澄清雞高湯</span> <span>適量 (蓋過食材)</span></li>
+            <li><span>70% 黑巧克力 / 爪哇咖哩塊</span> <span>2 片 / 1/4 塊</span></li>
+          </ul>
         </div>
 
         <div class="section">
-            <div class="section-title">烹飪</div>
-            <ul class="technique-list">
-                <li data-step="I">
-                    <strong>美拉德反應 (Maillard Reaction)</strong>
-                    高火熱鍋，不加油，將牛肋條塊每一面煎至極致金黃焦脆。盛出備用，保留鍋內珍貴牛油。
-                </li>
-                <li data-step="II">
-                    <strong>蔬菜與菌菇的底蘊</strong>
-                    利用原鍋牛油，低火慢炒洋蔥丁直至微透明焦糖化。加入蘑菇煸炒至出水縮小，香氣濃縮。
-                </li>
-                <li data-step="III">
-                    <strong>辛香料的綻放</strong>
-                    補入少許橄欖油，爆香蒜泥與薑泥。撒入紅椒粉與咖哩粉，翻炒 30 秒使油脂充分吸收粉末香氣。
-                </li>
-                <li data-step="IV">
-                    <strong>巴沙米克醋洗鍋 (Deglazing)</strong>
-                    倒入牛肉與醋液。利用酸性刮起鍋底凝結的肉香物質（Fond），這是醬汁深度的靈魂來源。
-                </li>
-                <li data-step="V">
-                    <strong>長效慢火燉煮 (L'art de Mijoter)</strong>
-                    注入雞高湯。大火煮沸後轉極小火，蓋緊鍋蓋悶煮 60 分鐘。
-                    <em>* 於 30 分鐘處檢查水位，若低於食材需酌量補充高湯。</em>
-                </li>
-                <li data-step="VI">
-                    <strong>最終熟成與巧克力</strong>
-                    熄火，利用餘溫溶入爪哇咖哩塊。重新開火悶煮 10 分鐘進行濃縮收汁。最後拌入黑巧克力，賦予醬汁深邃色澤與醇厚苦甜感。
-                </li>
-            </ul>
+          <div class="section-title">烹飪</div>
+          <ul class="technique-list">
+            <li data-step="I">
+              <strong>美拉德反應</strong>
+              牛肋條稍微修掉筋膜後切成適口小塊。
+              <div>高火熱鍋，不加油，將牛肋條塊每一面煎至極致金黃焦脆。盛出備用，保留鍋內珍貴牛油。</div>
+            </li>
+            <li data-step="II">
+              <strong>蔬菜與菌菇的底蘊</strong>
+              利用原鍋牛油，低火慢炒洋蔥丁直至微透明焦糖化。加入蘑菇煸炒至出水縮小，香氣濃縮。
+            </li>
+            <li data-step="III">
+              <strong>辛香料的綻放</strong>
+              補入少許橄欖油，爆香蒜泥與薑泥。'
+              將煎好的牛肋條倒回鍋中，與洋蔥、蘑菇、辛香料充分翻拌。
+            </li>
+            <li data-step="IV">
+              <strong>粉類附著</strong>
+              <div>撒入紅椒粉與咖哩粉，翻炒 30 秒使油脂充分吸收粉末香氣。</div>
+              可以短暫關火或移鍋
+            </li>
+            <li data-step="V">
+              <strong>巴沙米克醋洗鍋</strong>
+              倒醋液。利用酸性刮起鍋底凝結的肉香物質，這是醬汁深度的靈魂來源。
+              <div>第二次（收汁前 5 分鐘）再補「幾滴」巴沙米克</div>
+            </li>
+            <li data-step="VI">
+              <strong>長效慢火燉煮</strong>
+              注入雞高湯。大火煮沸後轉極小火，蓋緊鍋蓋悶煮 60 分鐘。
+              <em>* 於 30 分鐘處檢查水位，若低於食材需酌量補充高湯。</em>
+            </li>
+            <li data-step="VII">
+              <strong>最終熟成與巧克力</strong>
+              熄火，利用餘溫溶入爪哇咖哩塊。重新開火悶煮 10 分鐘進行濃縮收汁。最後拌入黑巧克力，賦予醬汁深邃色澤與醇厚苦甜感。
+            </li>
+          </ul>
         </div>
 
         <div class="chef-note">
-            此料理精髓在於「酸度的轉化」。長達一小時的悶煮能將巴沙米克醋的銳利轉為果乾般的甜美。若試味仍覺酸度明顯，可滴入極少許蜂蜜平衡。
+          此料理精髓在於「酸度的轉化」。長達一小時的悶煮能將巴沙米克醋的銳利轉為果乾般的甜美。若試味仍覺酸度明顯，可滴入極少許蜂蜜平衡。
         </div>
-    </div>
+      </div>
 
-    <div id="tofu-pasta" class="recipe-page">
+      <div id="tofu-pasta" class="recipe-page">
         <img src="https://source.unsplash.com/800x600/?fancy,tofu,pasta,fusion" alt="Fusion Tofu Pasta" class="recipe-illustration">
-
         <div class="recipe-header">
-            <h2>韓式豆腐義大利麵</h2>
-            <div class="recipe-meta">FUSION • ARTISAN • TEXTURED</div>
+          <h2>韓式豆腐義大利麵</h2>
         </div>
 
         <div class="section">
-            <div class="section-title">食 材</div>
-            <ul class="ingredients-grid">
-                <li><span>板豆腐 (需預先壓重去水 30m)</span> <span>1 塊</span></li>
-                <li><span>義大利麵 (細圓麵為佳)</span> <span>25g (精緻擺盤)</span></li>
-                <li><span>韓式風味醬 (辣醬/醬油/蠔油/糖)</span> <span>各 1 大匙</span></li>
-                <li><span>洋蔥碎 / 蒜泥 (極細化處理)</span> <span>適量</span></li>
-                <li><span>芝麻香油 / 冷壓橄欖油</span> <span>數滴 / 1 大匙</span></li>
-            </ul>
+          <div class="section-title">食 材</div>
+          <ul class="ingredients-grid">
+            <li><span>板豆腐 (需預先壓重去水 30m)</span> <span>1 塊</span></li>
+            <li><span>義大利麵 (細圓麵為佳)</span> <span>25g (精緻擺盤)</span></li>
+            <li><span>韓式風味醬 (辣醬/醬油/蠔油/糖)</span> <span>各 1 大匙</span></li>
+            <li><span>洋蔥碎 / 蒜泥 (極細化處理)</span> <span>適量</span></li>
+            <li><span>芝麻香油 / 冷壓橄欖油</span> <span>數滴 / 1 大匙</span></li>
+          </ul>
         </div>
 
         <div class="section">
-            <div class="section-title">烹飪</div>
-            <ul class="technique-list">
-                <li data-step="I">
-                    <strong>豆腐盅結構工程</strong>
-                    板豆腐壓乾水分後，以圓形模具挖空中心，取薄片填補底部。此步驟為承載麵條的關鍵地基。
-                </li>
-                <li data-step="II">
-                    <strong>上火炙烤 (Glazing)</strong>
-                    將醬料乳化後均勻塗抹於豆腐內外。置於上火烤箱 180°C 烘烤 10-12 分鐘，直至表面呈現琥珀焦糖感。
-                </li>
-                <li data-step="III">
-                    <strong>義大利麵與醬泥</strong>
-                    滾水加入 1% 鹽度。麵條提前 2 分鐘出鍋（Al Dente）。鍋中炒香極細洋蔥與醬汁，加入保留的 50ml 麵水乳化。
-                </li>
-                <li data-step="IV">
-                    <strong>立體擺盤與點綴</strong>
-                    使用長叉將麵條捲成高聳狀填入豆腐。淋上幾滴芝麻油，撒上蔥綠絲或辣椒絲增加視覺張力。
-                </li>
-            </ul>
+          <div class="section-title">烹飪</div>
+          <ul class="technique-list">
+            <li data-step="I">
+              <strong>豆腐結構工程</strong>
+              板豆腐壓乾水分後，以圓形模具挖空中心，取1/3薄片填補底部。此步驟為承載麵條的關鍵地基。
+            </li>
+            <li data-step="II">
+              <strong>塗抹醬料</strong>
+              醬料組合（每項 1大匙）：辣椒粉、韓式辣醬、醬油、低糖蠔油、寡糖糖漿 、橄欖油 。
+            <div>將以上調味混合，使用刷子或湯匙，均勻塗抹於豆腐外部與內部凹槽。</div>
+            </li>
+            <li data-step="III">
+              <strong>上火炙烤</strong>
+              豆腐置於上火烤箱 180°C 烘烤 10-12 分鐘，直至表面呈現琥珀焦糖感。
+            </li>
+            <li data-step="IV">
+              <strong>義大利麵</strong>
+              滾水加入 1% 鹽度。麵條提前 2 分鐘出鍋。
+              <div>1. 鍋中加入 1 小匙橄欖油，開中火，放入蒜末與洋蔥碎拌炒至微透明、出香氣。</div>
+              <div>2. 加入剩餘的醬料拌炒數秒。</div>
+              <div>3. 放入煮好的義大利麵，快速翻炒均勻，必要時添加50ml麵水調整濃度，讓醬料緊密包覆麵條。</div>
+            </li>
+            <li data-step="V">
+              <strong>立體擺盤與點綴</strong>
+              使用長叉將麵條捲成高聳狀填入豆腐。淋上幾滴芝麻油，撒上蔥綠絲或辣椒絲增加視覺張力。
+            </li>
+          </ul>
         </div>
-    </div>
+      </div>
 
-    <div id="nikujaga" class="recipe-page">
+      <div id="nikujaga" class="recipe-page">
         <img src="https://source.unsplash.com/800x600/?japanese,stew,potato,beef" alt="Nikujaga" class="recipe-illustration">
-
         <div class="recipe-header">
-            <h2>日式馬鈴薯燉肉</h2>
-            <div class="recipe-meta">TRADITIONAL • UMAMI • COMFORT</div>
+          <h2>日式馬鈴薯燉肉</h2>
         </div>
 
         <div class="section">
-            <div class="section-title">食 材</div>
-            <ul class="ingredients-grid">
-                <li><span>牛五花肉片 (油脂豐富)</span> <span>200g</span></li>
-                <li><span>馬鈴薯 (大塊狀)</span> <span>4 顆</span></li>
-                <li><span>紅蘿蔔 / 洋蔥 (粗切)</span> <span>1 根 / 1 顆</span></li>
-                <li><span>和風醬油 / 清酒 / 味霖</span> <span>3 / 2 / 0.5 大匙</span></li>
-                <li><span>軟水 (適宜長時間燉煮)</span> <span>600ml</span></li>
-            </ul>
+          <div class="section-title">食 材</div>
+          <ul class="ingredients-grid">
+            <li><span>牛五花肉片 (油脂豐富)</span> <span>200g</span></li>
+            <li><span>馬鈴薯 (大塊狀)</span> <span>4 顆</span></li>
+            <li><span>紅蘿蔔 / 洋蔥 (粗切)</span> <span>1 根 / 1 顆</span></li>
+            <li><span>和風醬油 / 清酒 / 味霖</span> <span>3 / 2 / 0.5 大匙</span></li>
+            <li><span>軟水 (適宜長時間燉煮)</span> <span>600ml</span></li>
+          </ul>
         </div>
 
         <div class="section">
-            <div class="section-title">La Technique / 烹飪工藝</div>
-            <ul class="technique-list">
-                <li data-step="I">
-                    <strong>紅蘿蔔的預處理</strong>
-                    紅蘿蔔先行入滾水煮 10 分鐘，軟化堅硬纖維，確保與馬鈴薯同步熟成。
-                </li>
-                <li data-step="II">
-                    <strong>肉質嫩度控管</strong>
-                    大火炒香洋蔥，加入牛五花片炒至 7 分熟。隨即撈起肉片，避免長時間燉煮導致蛋白質過度收縮而乾柴。
-                </li>
-                <li data-step="III">
-                    <strong>慢火 braise 與滲透</strong>
-                    加入馬鈴薯塊翻炒，倒入液體調料。中火煮沸後蓋蓋悶煮 20 分鐘。
-                </li>
-                <li data-step="IV">
-                    <strong>最終熟成 (The Resting)</strong>
-                    確認馬鈴薯鬆軟後回填肉片。**關火悶 10 分鐘**，利用餘溫讓肉片吸飽馬鈴薯澱粉釋出的濃醇湯汁。
-                </li>
-            </ul>
+          <div class="section-title">烹飪</div>
+          <ul class="technique-list">
+            <li data-step="I">
+              <strong>紅蘿蔔的預處理</strong>
+              將馬鈴薯、紅蘿蔔切成好入口的塊狀，洋蔥順紋切成粗絲。
+              <div>紅蘿蔔塊放入滾水中煮 10 分鐘。這能確保後續與馬鈴薯同煮時，紅蘿蔔也能達到完美的軟度。</div>
+            </li>
+            <li data-step="II">
+              <strong>肉質嫩度控管</strong>
+              鍋中倒入少許油，先炒洋蔥至呈現透明感，放入牛五花肉片，炒到約 7 分熟先撈起備用（這樣肉質才不會因為久燉而變乾柴）。
+            </li>
+            <li data-step="III">
+              <strong>慢火與滲透(時間：15 - 20 分鐘)</strong>
+              將馬鈴薯塊放入鍋中與洋蔥稍加拌炒。
+              <div>倒入 600ml 水、酒、味醂/糖以及和風醬油。</div>
+              <div>蓋上鍋蓋，以中火維持微滾狀態，燉煮至馬鈴薯用筷子可以輕鬆穿透的程度。</div>
+            </li>
+            <li data-step="IV">
+              <strong>最終熟成</strong>
+              確認馬鈴薯鬆軟後回填肉片。**關火悶 10 分鐘**，利用餘溫讓肉片吸飽馬鈴薯澱粉釋出的濃醇湯汁。
+            </li>
+          </ul>
         </div>
+      </div>
     </div>
+  </div>
 
-</div>
-
-<nav>
-    <div class="nav-item active" onclick="switchRecipe('beef-curry', this)">
-        <span class="nav-item-symbol">✦</span>
-        <span>歐風咖哩</span>
-    </div>
-    <div class="nav-item" onclick="switchRecipe('tofu-pasta', this)">
-        <span class="nav-item-symbol">◈</span>
-        <span>豆腐義大利麵</span>
-    </div>
-    <div class="nav-item" onclick="switchRecipe('nikujaga', this)">
-        <span class="nav-item-symbol">◇</span>
-        <span>日式燉肉</span>
-    </div>
-</nav>
-
-<script>
+  <script>
     function switchRecipe(id, element) {
-        // 如果點擊的是當前已激活的頁面，則不做任何動作，避免動畫重複觸發
-        if (element.classList.contains('active')) return;
+      if (element.classList.contains('active')) return;
 
-        const mainContent = document.getElementById('main-content');
-        
-        // 1. 先將內容捲回頂部，確保翻頁時從頭開始看
-        mainContent.scrollTop = 0;
+      const mainContent = document.getElementById('main-content');
+      mainContent.scrollTop = 0;
 
-        // 2. 短暫延遲後執行切換，讓捲動完成再翻頁，視覺更流暢
-        setTimeout(() => {
-            document.querySelectorAll('.recipe-page').forEach(page => {
-                page.classList.remove('active');
-            });
-            document.getElementById(id).classList.add('active');
+      setTimeout(() => {
+        document.querySelectorAll('.recipe-page').forEach(page => page.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
 
-            document.querySelectorAll('.nav-item').forEach(nav => {
-                nav.classList.remove('active');
-            });
-            element.classList.add('active');
-        }, 50);
+        document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+        element.classList.add('active');
+      }, 50);
     }
-</script>
+  </script>
 </body>
 </html>
